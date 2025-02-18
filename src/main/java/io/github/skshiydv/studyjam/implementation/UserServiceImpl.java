@@ -5,11 +5,17 @@ import io.github.skshiydv.studyjam.dto.RegisterDto;
 import io.github.skshiydv.studyjam.dto.UserEntityDto;
 import io.github.skshiydv.studyjam.entities.UserEntity;
 import io.github.skshiydv.studyjam.repositories.UserRepository;
+import io.github.skshiydv.studyjam.services.JwtService;
 import io.github.skshiydv.studyjam.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +24,8 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
     @Override
     @Transactional
@@ -49,11 +57,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserEntity getUser(LoginDto user) {
-        if(verifyUser(user).equals("User Verified")) {
-            return userRepository.findByUsername(user.getUsername());
-        }
-        return null;
+    public String getUser(LoginDto user) {
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        return jwtService.generateToken(user.getUsername());
+
     }
 
 @Override

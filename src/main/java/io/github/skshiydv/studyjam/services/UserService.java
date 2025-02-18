@@ -10,6 +10,7 @@ public interface UserService {
     String saveUser(RegisterDto user );
     List<UserEntityDto> getUsers();
     UserEntity findUserByUsername(String username);
-    UserEntity getUser(LoginDto user);
+
+    String getUser(LoginDto user);
     String verifyUser(LoginDto user);
 }
